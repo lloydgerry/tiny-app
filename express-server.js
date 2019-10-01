@@ -9,16 +9,16 @@ app.set("view engine", "ejs");
 const bodyParser = require("body-parser");
 app.use(bodyParser.urlencoded({extended: true}));
 
-let text = "";
+let newShortUrl = "";
 
 function generateRandomString(length) {
   length = 6;
   var possible = "ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789";
    
   for (var i = 0; i < length; i++) {
-    text += possible.charAt(Math.floor(Math.random() * possible.length));
+    newShortUrl += possible.charAt(Math.floor(Math.random() * possible.length));
   } 
-  return text;
+  return newShortUrl;
 }
 
 
@@ -47,14 +47,10 @@ app.get("/urls", (req, res) => {
 });
 
 app.post("/urls", (req, res) => {
-
-  generateRandomString();
-  let storeURL = req.body;
-  console.log(text);
-  Object.assign(urlDatabase, {text,  storeURL});
-  console.log(req.body, storeURL);  // Log the POST request body to the console
+  urlDatabase[generateRandomString()] = req.body.longURL;
+  // Object.assign(urlDatabase, {text :  storeURL});
   res.send("Ok");         // Respond with 'Ok' (we will replace this)
-  // res.redirect()
+  res.redirect("./urls")
 });
 
 app.get("/urls/:shortURL", (req, res) => {
