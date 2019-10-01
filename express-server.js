@@ -49,13 +49,17 @@ app.get("/urls", (req, res) => {
 app.post("/urls", (req, res) => {
   urlDatabase[generateRandomString()] = req.body.longURL;
   // Object.assign(urlDatabase, {text :  storeURL});
-  res.send("Ok");         // Respond with 'Ok' (we will replace this)
-  res.redirect("./urls")
+  res.redirect('/u/' +  newShortUrl);
 });
 
-app.get("/urls/:shortURL", (req, res) => {
-  let templateVars = { shortURL: req.params.shortURL, longURL: urlDatabase[shortURL] };
+app.get("/u/:shortURL", (req, res) => {
+  let templateVars = { shortURL: req.params.shortURL, longURL: urlDatabase[req.params.shortURL] };
   res.render("urls_show", templateVars);
+});
+
+app.get("/u/:shortURL", (req, res) => {
+  const longURL = req.params.longURL;
+  res.redirect(longURL);
 });
 
 
