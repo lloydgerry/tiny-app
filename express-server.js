@@ -67,10 +67,11 @@ app.get("/urls/:shortURL", (req, res) => {
 });
 
 //update longURL
-app.post("/urls/:shortURL/update", (req, res) => {
+app.post("/urls/:shortURL", (req, res) => {
   const shortURL = req.params.shortURL;
-
-  console.log(urlDatabase[shortURL]);
+  console.log(req.body.longURL);
+  urlDatabase[shortURL] = req.body.longURL;
+  res.redirect('/urls');
 })
 
 //delete entry

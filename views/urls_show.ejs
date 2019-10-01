@@ -25,9 +25,9 @@
       <div class="card-body">
         <h5 class="card-title">Edit</h5>
         <p class="card-text"> 
-          <form method="POST" action="/urls/<%= shortURL %>/update">
+          <form method="POST" action="/urls/<%= shortURL %>">
             <label for="newURL">New URL:</label>
-            <input for="longURL"><button type="submit">Update</button>
+            <input name="longURL"><button type="submit">Update</button>
         </form>
       </div>
   
