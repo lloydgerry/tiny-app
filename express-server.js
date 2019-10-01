@@ -1,12 +1,15 @@
 
-
+//Requirements
 const express = require("express");
 const bodyParser = require("body-parser");
 const morgan = require("morgan");
+const cookie = require('cookie-parser');
 const app = express();
+
+//Port Setting
 const PORT = 8080; // default port 8080
 
-
+// App Settings
 app.set("view engine", "ejs");
 
 app.use(bodyParser.urlencoded({extended: true}));
@@ -25,7 +28,7 @@ function generateRandomString(length) {
   return newShortUrl;
 }
 
-
+//Basic Url DB
 const urlDatabase = {
   "b2xVn2": "http://www.lighthouselabs.ca",
   "9sm5xK": "http://www.google.com"
@@ -34,11 +37,13 @@ const urlDatabase = {
 app.get("/", (req, res) => {
   res.send("Hello!");
 });
+//return db info as json
 app.get("/urls.json", (req, res) => {
   res.json(urlDatabase);
 });
+
 app.get("/hello", (req, res) => {
-  res.send("<html><body>Hello <b>World</b></body></html>\n");
+  res.send("<html><body>Hello there, and welcome to this Easter Egg.<b>World</b></body></html>\n");
 });
 
 app.get("/urls/new", (req, res) => {
