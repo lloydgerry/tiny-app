@@ -9,9 +9,10 @@ app.set("view engine", "ejs");
 const bodyParser = require("body-parser");
 app.use(bodyParser.urlencoded({extended: true}));
 
-function generateRandomString(num) {
-  var text = "";
-  num = 6;
+let text = "";
+
+function generateRandomString(length) {
+  length = 6;
   var possible = "ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789";
    
   for (var i = 0; i < length; i++) {
@@ -43,6 +44,17 @@ app.get("/urls/new", (req, res) => {
 app.get("/urls", (req, res) => {
   let templateVars = { urls: urlDatabase };
   res.render("urls_index", templateVars);
+});
+
+app.post("/urls", (req, res) => {
+
+  generateRandomString();
+  let storeURL = req.body;
+  console.log(text);
+  Object.assign(urlDatabase, {text,  storeURL});
+  console.log(req.body, storeURL);  // Log the POST request body to the console
+  res.send("Ok");         // Respond with 'Ok' (we will replace this)
+  // res.redirect()
 });
 
 app.get("/urls/:shortURL", (req, res) => {
