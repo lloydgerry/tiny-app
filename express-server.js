@@ -42,25 +42,30 @@ app.get("/urls.json", (req, res) => {
   res.json(urlDatabase);
 });
 
+//EE
 app.get("/hello", (req, res) => {
   res.send("<html><body>Hello there, and welcome to this Easter Egg.<b>World</b></body></html>\n");
 });
 
+//Create new URL
 app.get("/urls/new", (req, res) => {
   res.render("urls_new");
 });
 
+//"index"
 app.get("/urls", (req, res) => {
   let templateVars = { urls: urlDatabase };
   res.render("urls_index", templateVars);
 });
 
+//Create new live only entry 
 app.post("/urls", (req, res) => {
   urlDatabase[generateRandomString()] = req.body.longURL;
   // Object.assign(urlDatabase, {text :  storeURL});
   res.redirect('/url/' +  newShortUrl);
 });
 
+//If short URL clicked, redirect to actual site
 app.get("/u/:shortURL", (req, res) => {
   const longURL = urlDatabase[req.params.shortURL];
   res.redirect(longURL);
@@ -86,6 +91,7 @@ app.post("/urls/:shortURL/delete", (req, res) => {
   res.redirect('/urls');
 });
 
+//Server Setup and screen log
 app.listen(PORT, () => {
   console.log(`Example app listening on port ${PORT}!`);
 });
