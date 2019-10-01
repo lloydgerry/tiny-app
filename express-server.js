@@ -3,7 +3,7 @@
 const express = require("express");
 const bodyParser = require("body-parser");
 const morgan = require("morgan");
-const cookie = require('cookie-parser');
+const cookieParser = require('cookie-parser');
 const app = express();
 
 //Port Setting
@@ -13,8 +13,8 @@ const PORT = 8080; // default port 8080
 app.set("view engine", "ejs");
 
 app.use(bodyParser.urlencoded({extended: true}));
-app.use(morgan(':method :url :status :response-time ms - :res[content-length]'))
-
+app.use(morgan(':method :url :status :response-time ms - :res[content-length]'));
+app.use(cookieParser());
 
 let newShortUrl = "";
 
@@ -54,9 +54,19 @@ app.get("/urls/new", (req, res) => {
 
 //"index"
 app.get("/urls", (req, res) => {
-  let templateVars = { urls: urlDatabase };
+  let templateVars = { 
+    urls: urlDatabase,
+    userId: req.cookies['userId'],
+   };
   res.render("urls_index", templateVars);
 });
+
+//login w/ cookie
+app.post("/login", (req, res) => {
+  let userId = req.body.userId;
+  res.cookie('name', userId);
+  res.redirect('/urls')
+})
 
 //Create new live only entry 
 app.post("/urls", (req, res) => {

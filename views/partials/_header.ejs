@@ -11,7 +11,18 @@
         <div class="navbar-nav">
           <a class="nav-item nav-link" href="/urls">My URLs</a>
           <a class="nav-item nav-link" href="/urls/new">Create New URL</a>
+          
         </div>
+        <div class ="buttons" align="right">
+            <form class="form-inline" method="POST" action="/login">
+            <label for "userId">Enter a username</label>
+            <input class="form-control" type="text" name="userId" placeholder="myusername" margin: "1em" margin-left:500px>
+            <button type="submit" class="btn btn-primary">Submit</button>
+          </form>
+          </div>
+          <div class="login">
+           <td> <%= userId %> </td>
+          </div>
       </div>
     </nav>
   </header>
