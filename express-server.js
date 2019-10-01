@@ -1,13 +1,17 @@
 
 
 const express = require("express");
+const bodyParser = require("body-parser");
+const morgan = require("morgan");
 const app = express();
 const PORT = 8080; // default port 8080
 
+
 app.set("view engine", "ejs");
 
-const bodyParser = require("body-parser");
 app.use(bodyParser.urlencoded({extended: true}));
+app.use(morgan(':method :url :status :response-time ms - :res[content-length]'))
+
 
 let newShortUrl = "";
 
@@ -49,19 +53,26 @@ app.get("/urls", (req, res) => {
 app.post("/urls", (req, res) => {
   urlDatabase[generateRandomString()] = req.body.longURL;
   // Object.assign(urlDatabase, {text :  storeURL});
-  res.redirect('/u/' +  newShortUrl);
+  res.redirect('/url/' +  newShortUrl);
 });
 
 app.get("/u/:shortURL", (req, res) => {
+  console.log(req.params.shortURL);
+  console.log(urlDatabase[req.params.shortURL]);
+  const longURL = urlDatabase[req.params.shortURL];
+  res.redirect(longURL);
+});
+
+app.get("/url/:shortURL", (req, res) => {
   let templateVars = { shortURL: req.params.shortURL, longURL: urlDatabase[req.params.shortURL] };
   res.render("urls_show", templateVars);
 });
 
-app.get("/u/:shortURL", (req, res) => {
-  const longURL = req.params.longURL;
-  res.redirect(longURL);
+app.post("/url/:shortURL/delete", (req, res) => {
+  const shortURL = req.params.shortURL;
+  delete urlDatabase[shortURL];
+  res.redirect('/urls');
 });
-
 
 app.listen(PORT, () => {
   console.log(`Example app listening on port ${PORT}!`);
