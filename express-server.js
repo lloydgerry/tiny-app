@@ -23,13 +23,13 @@ let newShortUrl = "";
 
 const generateRandomString = function(length) {
 
-  var possible = "ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789";
+  let possible = "ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789";
    
-  for (var i = 0; i < length; i++) {
+  for (let i = 0; i < length; i++) {
     newShortUrl += possible.charAt(Math.floor(Math.random() * possible.length));
-  } 
+  }
   return newShortUrl;
-}
+};
 
 // True/false found email function
 const foundEmail = function(emailId) {
@@ -37,7 +37,7 @@ const foundEmail = function(emailId) {
     console.log(users[user].email);
     if (users[user].email === emailId) {
       return true;
-    } 
+    }
   }
   return false;
 };
@@ -45,18 +45,18 @@ const foundEmail = function(emailId) {
 // ===============================
 // SERVER OBJECTS
 //Users object
-const users = { 
+const users = {
   "testuser1": {
-    id: "userRandomID", 
-    email: "user@example.com", 
+    id: "userRandomID",
+    email: "user@example.com",
     password: "123-words"
   },
- "testuser2": {
-    id: "user2RandomID", 
-    email: "user2@example.com", 
+  "testuser2": {
+    id: "user2RandomID",
+    email: "user2@example.com",
     password: "the-secure-password"
   },
-}
+};
 
 //Basic Url DB
 const urlDatabase = {
@@ -66,6 +66,17 @@ const urlDatabase = {
 
 // ===============================
 // EXPRESS APP
+
+const getTemplateVars = function(req) {
+  let userId = req.cookies['userId'];
+  let user = users[userId];
+  let templateVars = {
+    urls: urlDatabase,
+    user: user,
+  };
+  console.log(templateVars);
+  return templateVars
+}
 
 app.get("/", (req, res) => {
   res.send("Hello!");
@@ -83,19 +94,14 @@ app.get("/hello", (req, res) => {
 
 //Create new URL
 app.get("/urls/new", (req, res) => {
-  let templateVars = { 
-    urls: urlDatabase,
-    userId: req.cookies['userId'],
-   };
+  templateVars = getTemplateVars(req);
   res.render("urls_new", templateVars);
 });
 
 //"index"
 app.get("/urls", (req, res) => {
-  let templateVars = { 
-    urls: urlDatabase,
-    userId: req.cookies['userId'],
-   };
+  templateVars = getTemplateVars(req);
+
   res.render("urls_index", templateVars);
 });
 
@@ -103,15 +109,15 @@ app.get("/urls", (req, res) => {
 app.post("/login", (req, res) => {
   let userId = req.body.userId;
   res.cookie('userId', userId);
-  res.redirect('/urls')
-})
+  res.redirect('/urls');
+});
 
-//Logout 
+//Logout
 app.post("/logout", (req, res) => {
   let userId = req.cookies['userId'];
   res.clearCookie('userId', userId);
   res.redirect('/urls');
-})
+});
 
 //Create new url entry
 app.post("/urls", (req, res) => {
@@ -136,13 +142,11 @@ app.get("/urls/:shortURL", (req, res) => {
 
 //Register Page
 app.get("/register", (req, res) => {
-  console.log("welcome to the register page!")
-  let templateVars = { 
-    urls: urlDatabase,
-    userId: req.cookies['userId'],
-   };
+  console.log("welcome to the register page!");
+  templateVars = getTemplateVars(req);
+
   res.render("register", templateVars);
-})
+});
 
 
 //Register new user form
@@ -165,7 +169,7 @@ app.post("/register", (req, res) => {
     //set object from form data
     newUserObject = {
       id: userId,
-      email: email, 
+      email: email,
       password: password,
     },
 
@@ -175,16 +179,16 @@ app.post("/register", (req, res) => {
     //set cookie from generated userId
     res.cookie('userId', userId);
 
-    res.redirect('/urls')
+    res.redirect('/urls');
   }
-})
+});
 
 //Update longURL
 app.post("/urls/:shortURL", (req, res) => {
   const shortURL = req.params.shortURL;
   urlDatabase[shortURL] = req.body.longURL;
   res.redirect('/urls');
-})
+});
 
 //Delete entry
 app.post("/urls/:shortURL/delete", (req, res) => {

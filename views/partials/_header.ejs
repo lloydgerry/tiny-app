@@ -14,7 +14,7 @@
           
         </div>
         <div class ="buttons ml-auto p-2 bd-highlight">
-            <% if (typeof userId === 'undefined') { %>
+            <% if (!user) { %>
             <form class="form-inline" method="POST" action="/login">
             <label for "userId"></label>
             <input class="form-control" type="text" name="userId" placeholder="myusername" margin: "1em" margin-left:500px>
@@ -22,16 +22,16 @@
           </form>
           <% } %> 
         </div>
-        <% if (typeof userId !== 'undefined') { %>
+        <% if (user) { %>
         <div class="navbar ml-auto p-2 bd-highlight">
           <div class="navbar nav-item">
-          Logged in as: <%= userId %>
+          Logged in as: <%= user.email %>
         </div>
           <form method="POST" action="/logout">
           <button  type="submit" class="btn btn-info">Logout</button>
         </form>
         <% } %>
-        </div>
+        </div> 
       </div>
     </nav>
   </header>
