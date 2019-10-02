@@ -34,7 +34,7 @@ const generateRandomString = function(length) {
 // True/false found email function
 const foundEmail = function(emailId) {
   for (user in users) {
-    console.log(users[user].email);
+    // console.log(users[user].email);
     if (users[user].email === emailId) {
       return true;
     }
@@ -42,6 +42,26 @@ const foundEmail = function(emailId) {
   return false;
 };
 
+const foundPassword = function(passwordId) {
+  for (user in users) {
+    console.log(users[user].password);
+    if (users[user].password === passwordId) {
+      return true;
+    }
+  }
+  return false;
+}
+
+const getTemplateVars = function(req) {
+  let userId = req.cookies['userId'];
+  let user = users[userId];
+  let templateVars = {
+    urls: urlDatabase,
+    user: user,
+  };
+  // console.log(templateVars);
+  return templateVars
+}
 // ===============================
 // SERVER OBJECTS
 //Users object
@@ -67,16 +87,7 @@ const urlDatabase = {
 // ===============================
 // EXPRESS APP
 
-const getTemplateVars = function(req) {
-  let userId = req.cookies['userId'];
-  let user = users[userId];
-  let templateVars = {
-    urls: urlDatabase,
-    user: user,
-  };
-  console.log(templateVars);
-  return templateVars
-}
+
 
 app.get("/", (req, res) => {
   res.send("Hello!");
@@ -92,30 +103,42 @@ app.get("/hello", (req, res) => {
   res.send("<html><body>Hello there, and welcome to this Easter Egg.<b>World</b></body></html>\n");
 });
 
+app.get("/login", (req, res) => {
+  // console.log(req.body)
+  templateVars = getTemplateVars(req);
+  res.render("login", templateVars)
+})
+
 //Create new URL
 app.get("/urls/new", (req, res) => {
-  templateVars = getTemplateVars(req);
+  let templateVars = getTemplateVars(req);
   res.render("urls_new", templateVars);
 });
 
 //"index"
 app.get("/urls", (req, res) => {
-  templateVars = getTemplateVars(req);
-
+  let templateVars = getTemplateVars(req);
   res.render("urls_index", templateVars);
 });
 
 //Login w/ cookie
 app.post("/login", (req, res) => {
-  let userId = req.body.userId;
+  let templateVars = getTemplateVars(req);
+  if (!foundEmail) {
+    res.status(403);
+    res.send("YOU SHALL NOT PASS: This email is not registered.")
+  }
+  if (foundEmail) {
+
+  }
   res.cookie('userId', userId);
   res.redirect('/urls');
 });
 
 //Logout
 app.post("/logout", (req, res) => {
-  let userId = req.cookies['userId'];
-  res.clearCookie('userId', userId);
+  let templateVars = getTemplateVars(req);
+  res.clearCookie('userId', user);
   res.redirect('/urls');
 });
 

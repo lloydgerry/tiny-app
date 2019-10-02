@@ -13,18 +13,13 @@
           <a class="nav-item nav-link" href="/urls/new">Create New URL</a>
           
         </div>
-        <div class ="buttons ml-auto p-2 bd-highlight">
-            <% if (!user) { %>
-            <form class="form-inline" method="POST" action="/login">
-            <label for "userId"></label>
-            <input class="form-control" type="text" name="userId" placeholder="myusername" margin: "1em" margin-left:500px>
-            <button type="submit" class="btn btn-primary">Submit</button>
-          </form>
-          <% } %> 
-        </div>
-        <% if (user) { %>
         <div class="navbar ml-auto p-2 bd-highlight">
-          <div class="navbar nav-item">
+          <% if (!user) { %>
+            <form method="GET" action="/login">
+            <button  type="submit" class="btn btn-info">Login</button>
+            </form>
+          <% } %>
+        <% if (user) { %>
           Logged in as: <%= user.email %>
         </div>
           <form method="POST" action="/logout">
