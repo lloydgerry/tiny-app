@@ -13,16 +13,25 @@
           <a class="nav-item nav-link" href="/urls/new">Create New URL</a>
           
         </div>
-        <div class ="buttons" align="right">
+        <div class ="buttons ml-auto p-2 bd-highlight">
+            <% if (typeof userId === 'undefined') { %>
             <form class="form-inline" method="POST" action="/login">
-            <label for "userId">Enter a username</label>
+            <label for "userId"></label>
             <input class="form-control" type="text" name="userId" placeholder="myusername" margin: "1em" margin-left:500px>
             <button type="submit" class="btn btn-primary">Submit</button>
           </form>
-          </div>
-          <div class="login">
-           <td> <%= userId %> </td>
-          </div>
+          <% } %> 
+        </div>
+        <% if (typeof userId !== 'undefined') { %>
+        <div class="navbar ml-auto p-2 bd-highlight">
+          <div class="navbar nav-item">
+          Logged in as: <%= userId %>
+        </div>
+          <form method="POST" action="/logout">
+          <button  type="submit" class="btn btn-info">Logout</button>
+        </form>
+        <% } %>
+        </div>
       </div>
     </nav>
   </header>

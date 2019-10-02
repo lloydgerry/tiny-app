@@ -49,7 +49,11 @@ app.get("/hello", (req, res) => {
 
 //Create new URL
 app.get("/urls/new", (req, res) => {
-  res.render("urls_new");
+  let templateVars = { 
+    urls: urlDatabase,
+    userId: req.cookies['userId'],
+   };
+  res.render("urls_new", templateVars);
 });
 
 //"index"
@@ -64,14 +68,20 @@ app.get("/urls", (req, res) => {
 //login w/ cookie
 app.post("/login", (req, res) => {
   let userId = req.body.userId;
-  res.cookie('name', userId);
+  res.cookie('userId', userId);
   res.redirect('/urls')
 })
 
-//Create new live only entry 
+//logout 
+app.post("/logout", (req, res) => {
+  let userId = req.cookies['userId'];
+  res.clearCookie('userId', userId);
+  res.redirect('/urls');
+})
+
+//Create new url entry
 app.post("/urls", (req, res) => {
   urlDatabase[generateRandomString()] = req.body.longURL;
-  // Object.assign(urlDatabase, {text :  storeURL});
   res.redirect('/url/' +  newShortUrl);
 });
 
@@ -89,7 +99,6 @@ app.get("/urls/:shortURL", (req, res) => {
 //update longURL
 app.post("/urls/:shortURL", (req, res) => {
   const shortURL = req.params.shortURL;
-  console.log(req.body.longURL);
   urlDatabase[shortURL] = req.body.longURL;
   res.redirect('/urls');
 })
