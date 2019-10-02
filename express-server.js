@@ -9,7 +9,7 @@ const app = express();
 //Port Setting
 const PORT = 8080; // default port 8080
 
-// App Settings
+//App Settings
 app.set("view engine", "ejs");
 
 app.use(bodyParser.urlencoded({extended: true}));
@@ -18,8 +18,11 @@ app.use(cookieParser());
 
 let newShortUrl = "";
 
-function generateRandomString(length) {
-  length = 6;
+// ===============================
+// FUNCTIONS
+
+const generateRandomString = function(length) {
+
   var possible = "ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789";
    
   for (var i = 0; i < length; i++) {
@@ -28,16 +31,47 @@ function generateRandomString(length) {
   return newShortUrl;
 }
 
+// True/false found email function
+const foundEmail = function(emailId) {
+  for (user in users) {
+    console.log(users[user].email);
+    if (users[user].email === emailId) {
+      return true;
+    } 
+  }
+  return false;
+};
+
+// ===============================
+// SERVER OBJECTS
+//Users object
+const users = { 
+  "testuser1": {
+    id: "userRandomID", 
+    email: "user@example.com", 
+    password: "123-words"
+  },
+ "testuser2": {
+    id: "user2RandomID", 
+    email: "user2@example.com", 
+    password: "the-secure-password"
+  },
+}
+
 //Basic Url DB
 const urlDatabase = {
   "b2xVn2": "http://www.lighthouselabs.ca",
   "9sm5xK": "http://www.google.com"
 };
 
+// ===============================
+// EXPRESS APP
+
 app.get("/", (req, res) => {
   res.send("Hello!");
 });
-//return db info as json
+
+//Return db info as json
 app.get("/urls.json", (req, res) => {
   res.json(urlDatabase);
 });
@@ -65,14 +99,14 @@ app.get("/urls", (req, res) => {
   res.render("urls_index", templateVars);
 });
 
-//login w/ cookie
+//Login w/ cookie
 app.post("/login", (req, res) => {
   let userId = req.body.userId;
   res.cookie('userId', userId);
   res.redirect('/urls')
 })
 
-//logout 
+//Logout 
 app.post("/logout", (req, res) => {
   let userId = req.cookies['userId'];
   res.clearCookie('userId', userId);
@@ -81,7 +115,10 @@ app.post("/logout", (req, res) => {
 
 //Create new url entry
 app.post("/urls", (req, res) => {
-  urlDatabase[generateRandomString()] = req.body.longURL;
+  //change id length as num
+  let num = 6;
+
+  urlDatabase[generateRandomString(num)] = req.body.longURL;
   res.redirect('/url/' +  newShortUrl);
 });
 
@@ -91,25 +128,72 @@ app.get("/u/:shortURL", (req, res) => {
   res.redirect(longURL);
 });
 
+//Short URL Page
 app.get("/urls/:shortURL", (req, res) => {
   let templateVars = { shortURL: req.params.shortURL, longURL: urlDatabase[req.params.shortURL] };
   res.render("urls_show", templateVars);
 });
 
-//update longURL
+//Register Page
+app.get("/register", (req, res) => {
+  console.log("welcome to the register page!")
+  let templateVars = { 
+    urls: urlDatabase,
+    userId: req.cookies['userId'],
+   };
+  res.render("register", templateVars);
+})
+
+
+//Register new user form
+app.post("/register", (req, res) => {
+  const email = req.body.email;
+  const password = req.body.password;
+
+  if ((email.length === 0) || (password.length === 0)) {
+    res.status(400);
+    res.send("YOU SHALL NOT PASS: you left something blank.");
+  } else if (foundEmail(email)) {
+    res.status(400);
+    res.send("Sorry bub, you've been here before.");
+  } else {
+
+    //make new userID
+    let num = 8; //length of random userID string
+    let userId = generateRandomString(num);
+
+    //set object from form data
+    newUserObject = {
+      id: userId,
+      email: email, 
+      password: password,
+    },
+
+    //write to users object from form data
+    users[userId] = newUserObject;
+
+    //set cookie from generated userId
+    res.cookie('userId', userId);
+
+    res.redirect('/urls')
+  }
+})
+
+//Update longURL
 app.post("/urls/:shortURL", (req, res) => {
   const shortURL = req.params.shortURL;
   urlDatabase[shortURL] = req.body.longURL;
   res.redirect('/urls');
 })
 
-//delete entry
+//Delete entry
 app.post("/urls/:shortURL/delete", (req, res) => {
   const shortURL = req.params.shortURL;
   delete urlDatabase[shortURL];
   res.redirect('/urls');
 });
 
+// ===============================
 //Server Setup and screen log
 app.listen(PORT, () => {
   console.log(`Example app listening on port ${PORT}!`);
