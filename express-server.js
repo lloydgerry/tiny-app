@@ -5,6 +5,9 @@ const bodyParser = require("body-parser");
 const morgan = require("morgan");
 const cookieParser = require('cookie-parser');
 const app = express();
+const bcrypt = require('bcrypt');
+
+
 
 //Port Setting
 const PORT = 8080; // default port 8080
@@ -42,9 +45,11 @@ const getUserByEmail = function(emailId) {
 
 // True/false found password function
 const foundPassword = function(passwordId) {
-  for (user in users) {
-    // console.log(users[user].password);
-    if (users[user].password === passwordId) {
+  for (key in users) {
+    console.log("stored pass: ", users[key].password);
+    console.log("pass var: ", passwordId)
+    // bcrypt.compareSync(password, users[key].password); // returns true
+    if (bcrypt.compareSync(passwordId, users[key].password) === true) {
       return true;
     }
   }
@@ -82,20 +87,10 @@ const urlsForUser = function(id) {
 // SERVER OBJECTS
 //Users object
 const users = {
-  "5f67f5": {
-    id: "5f67f5",
-    email: "user@example.com",
-    password: "123-words"
-  },
-  "d6gd323d": {
-    id: "d6gd323d",
-    email: "user2@example.com",
-    password: "the-secure-password"
-  },
   "test": {
     id: "test",
     email: "test@test.com",
-    password: "test"
+    password: "$2b$10$SAka14YqvrRtgIdbZiVeNuyN3PdRciKhR1hDNVSi6/W/zhDNc0j3O"
   },
 };
 
@@ -154,13 +149,16 @@ app.post("/login", (req, res) => {
   let user = getUserByEmail(emailId);
   console.log("user object: ", user)
   let password = req.body.password;
+  // let compareHash =  bcrypt.compareSync(password, hashedPassword); // returns true
+
+  
   if (getUserByEmail(emailId) === false) {
     res.status(403);
     res.send("YOU SHALL NOT PASS: This email is not registered.")
   } else if (foundPassword(password) === false) {
       res.status(403);
       res.send("YOU SHALL NOT PASS: The email or password was incorrect");
-
+      console.log(foundPassword(password))
     } else if (foundPassword(password) === true) {
       res.cookie('userId', user["id"]);
       res.redirect('/urls');
@@ -217,6 +215,8 @@ app.get("/register", (req, res) => {
 app.post("/register", (req, res) => {
   const email = req.body.email;
   const password = req.body.password;
+  const hashedPassword = bcrypt.hashSync(password, 10);
+  console.log(hashedPassword);
 
   if ((email.length === 0) || (password.length === 0)) {
     res.status(400);
@@ -234,7 +234,7 @@ app.post("/register", (req, res) => {
     newUserObject = {
       id: userId,
       email: email,
-      password: password,
+      password: hashedPassword,
     },
 
     //write to users object from form data
