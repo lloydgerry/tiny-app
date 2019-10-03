@@ -26,18 +26,19 @@
        </tr>
      </thead>
      <tbody>
-       <% for(let url in urls) { %>
+       <% for (let key in urlsforUserId) { %>
          <tr>
-           <td><%= url %></td>
-           <td><%= urls[url] %></td>
+           <td><%= urlsforUserId[key].shortURL %></td>
+           <%= console.log(urlsforUserId[key]) %>
+           <td><%= urlsforUserId[key].longURL %></td>
            <td>  
-            <form method="GET" action="/urls/<%= url %>">
+            <form method="GET" action="/urls/<%= urlsforUserId[key].shortURL %>">
               <button type="submit" class="btn btn-warning">Edit</button>
             </form>
             </form>
            </td>
            <td> 
-             <form method="POST" action="/urls/<%= url %>/delete">
+             <form method="POST" action="/urls/<%= urlsforUserId[key].shortURL %>/delete">
               <button type="submit" class="btn btn-danger">Delete</button>
             </form>
           </td>
