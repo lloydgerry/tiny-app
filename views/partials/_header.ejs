@@ -16,8 +16,11 @@
         <div class="navbar ml-auto p-2 bd-highlight">
           <% if (!user) { %>
             <form method="GET" action="/login">
-            <button  type="submit" class="btn btn-info">Login</button>
+            <button  type="submit" class="btn btn-primary">Login</button>
             </form>
+            <form method="GET" action="/register">
+              <button  type="submit" class="btn btn-info">Register</button>
+              </form>
           <% } %>
         <% if (user) { %>
           Logged in as: <%= user.email %>

@@ -32,19 +32,20 @@ const generateRandomString = function(length) {
 };
 
 // True/false found email function
-const foundEmail = function(emailId) {
-  for (user in users) {
+const getUserByEmail = function(emailId) {
+  for (key in users) {
     // console.log(users[user].email);
-    if (users[user].email === emailId) {
-      return true;
+    if (users[key].email === emailId) {
+      return users[key];
     }
   }
   return false;
 };
 
+// True/false found password function
 const foundPassword = function(passwordId) {
   for (user in users) {
-    console.log(users[user].password);
+    // console.log(users[user].password);
     if (users[user].password === passwordId) {
       return true;
     }
@@ -54,10 +55,12 @@ const foundPassword = function(passwordId) {
 
 const getTemplateVars = function(req) {
   let userId = req.cookies['userId'];
+  // console.log("Users object: ", users)
   let user = users[userId];
+  // console.log("var user: ", user);
   let templateVars = {
     urls: urlDatabase,
-    user: user,
+    user: user
   };
   // console.log(templateVars);
   return templateVars
@@ -66,15 +69,20 @@ const getTemplateVars = function(req) {
 // SERVER OBJECTS
 //Users object
 const users = {
-  "testuser1": {
-    id: "userRandomID",
+  "userrandomId1": {
+    id: "userrandomId1",
     email: "user@example.com",
     password: "123-words"
   },
-  "testuser2": {
-    id: "user2RandomID",
+  "userrandomId2": {
+    id: "user2RandomId2",
     email: "user2@example.com",
     password: "the-secure-password"
+  },
+  "test": {
+    id: "userrandomId1",
+    email: "user@example.com",
+    password: "test"
   },
 };
 
@@ -86,8 +94,6 @@ const urlDatabase = {
 
 // ===============================
 // EXPRESS APP
-
-
 
 app.get("/", (req, res) => {
   res.send("Hello!");
@@ -124,21 +130,31 @@ app.get("/urls", (req, res) => {
 //Login w/ cookie
 app.post("/login", (req, res) => {
   let templateVars = getTemplateVars(req);
-  if (!foundEmail) {
+  let emailId = req.body.email;
+  let user = getUserByEmail(emailId);
+  console.log("user object: ", user)
+  let password = req.body.password;
+  if (getUserByEmail(emailId) === false) {
     res.status(403);
     res.send("YOU SHALL NOT PASS: This email is not registered.")
-  }
-  if (foundEmail) {
+  } else if (foundPassword(password) === false) {
+      res.status(403);
+      res.send("YOU SHALL NOT PASS: This email or password was incorrect");
+      console.log("We passed to found password")
 
-  }
-  res.cookie('userId', userId);
-  res.redirect('/urls');
+    } else if (foundPassword(password) === true) {
+      console.log("We got false flag for password")
+      // console.log("users: ", users);
+      // console.log("user: ", userId);
+      res.cookie('userId', user["id"]);
+      res.redirect('/urls');
+    }
 });
 
 //Logout
 app.post("/logout", (req, res) => {
-  let templateVars = getTemplateVars(req);
-  res.clearCookie('userId', user);
+  let userId = req.cookies["userId"];
+  res.clearCookie('userId', userId);
   res.redirect('/urls');
 });
 
@@ -180,7 +196,7 @@ app.post("/register", (req, res) => {
   if ((email.length === 0) || (password.length === 0)) {
     res.status(400);
     res.send("YOU SHALL NOT PASS: you left something blank.");
-  } else if (foundEmail(email)) {
+  } else if (getUserByEmail(email)) {
     res.status(400);
     res.send("Sorry bub, you've been here before.");
   } else {
