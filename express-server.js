@@ -8,6 +8,7 @@ const cookieSession = require('cookie-session');
 const app = express();
 const bcrypt = require('bcrypt');
 
+
 const { getUserByEmail } = require('./helpers.js')
 
  
@@ -50,33 +51,25 @@ const foundPassword = function(passwordId) {
 
 const getTemplateVars = function(req) {
   let userId = req.session.user_id;
-  // console.log("templatevars req params: ", req.params);
   let user = users[userId];
-  // console.log("templatevar userId: ", userId);
-  // console.log("templatevars users object", users);
-  // console.log("var user: ", user);
   let templateVars = {
     urls: urlDatabase,
     urlsforUserId: urlsForUser(userId),
     user: user
   };
-  // console.log(templateVars);
   return templateVars;
 };
 
 //returns array of object urls based on userId (cookie id)
 const urlsForUser = function(id) {
   let urlIds = [];
-  // console.log(id);
   for (let key in urlDatabase) {
     if (urlDatabase[key].userId === id) {
       urlIds.push(urlDatabase[key])
-      // console.log("adding this key: ", urlDatabase[key]);
     }
-    
   }
   return urlIds;
-}
+};
 // ===============================
 // SERVER OBJECTS
 //Users object
@@ -134,7 +127,7 @@ app.get("/urls", (req, res) => {
   let templateVars = getTemplateVars(req);
   let userId = req.session.user_id;
   if (userId === undefined) {
-    window.alert("Please login to see this page");
+    res.send('Please <a href=./login>login</a> to see this content.')
     res.redirect('/login');
   } else {
     res.render("urls_index", templateVars);
