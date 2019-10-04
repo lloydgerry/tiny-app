@@ -7,8 +7,6 @@ const cookieParser = require('cookie-parser');
 const cookieSession = require('cookie-session');
 const app = express();
 const bcrypt = require('bcrypt');
-
-
 const { getUserByEmail } = require('./helpers.js');
 
 //Port Setting
@@ -48,6 +46,7 @@ const foundPassword = function(users, passwordId) {
   return false;
 };
 
+// Const TempplateVars temnplate for most functions
 const getTemplateVars = function(req) {
   let userId = req.session.user_id;
   let user = users[userId];
@@ -63,11 +62,12 @@ const getTemplateVars = function(req) {
 const urlsForUser = function(id) {
   let urlIds = [];
   for (let key in urlDatabase) {
-    if (urlDatabase[key].userId === id) {
+    if (urlDatabase[key].user_id === id) {
       urlIds.push(urlDatabase[key]);
     }
   }
   return urlIds;
+  console.log(urlIds);
 };
 
 // ===============================
@@ -162,7 +162,7 @@ app.post("/urls", (req, res) => {
   //change id length as num
   let num = 6;
   let newShortUrl = generateRandomString(num);
-  
+
   urlDatabase[newShortUrl] = { 
     shortURL: newShortUrl,
     longURL: req.body.longURL,
