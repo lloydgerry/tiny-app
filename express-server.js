@@ -136,7 +136,12 @@ app.get("/urls/new", (req, res) => {
 app.get("/urls", (req, res) => {
   let templateVars = getTemplateVars(req);
   let userId = req.session.user_id;
-  res.render("urls_index", templateVars);
+  if (userId === undefined) {
+    window.alert("Please login to see this page");
+    res.redirect('/login');
+  } else {
+    res.render("urls_index", templateVars);
+  }
 });
 
 //Login w/ cookie
