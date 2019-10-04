@@ -5,15 +5,12 @@ const bodyParser = require("body-parser");
 const morgan = require("morgan");
 const cookieParser = require('cookie-parser');
 const cookieSession = require('cookie-session');
-const { getUserByEmail } = require('./helpers.js')
-
-// const getUserByEmail = getUserByEmailExport();
-
 const app = express();
 const bcrypt = require('bcrypt');
 
+const { getUserByEmail } = require('./helpers.js')
 
-
+ 
 //Port Setting
 const PORT = 8080; // default port 8080
 
