@@ -101,7 +101,6 @@ app.get("/hello", (req, res) => {
 });
 
 app.get("/login", (req, res) => {
-  // console.log(req.body)
   let templateVars = getTemplateVars(req);
 
   res.render("login", templateVars);
@@ -147,7 +146,6 @@ app.post("/login", (req, res) => {
     res.send("YOU SHALL NOT PASS: The email or password was incorrect");
 
   } else if (foundPassword(users, password) === true) {
-    // console.log("login user object: ", user);
     req.session.user_id = user.user_id;
     res.redirect('/urls');
   }
@@ -164,7 +162,7 @@ app.post("/urls", (req, res) => {
   //change id length as num
   let num = 6;
   let newShortUrl = generateRandomString(num);
-  console.log("new url req body longURL: ", req.body.longURL)
+  
   urlDatabase[newShortUrl] = { 
     shortURL: newShortUrl,
     longURL: req.body.longURL,
@@ -189,12 +187,13 @@ app.get("/urls/:shortURL", (req, res) => {
     shortURL: shortURL,
     user: user,
   };
+
   if (userId === undefined) {
     res.send('Please <a href=./login>login</a> to see this content.');
+
   } else if (userId !== urlDatabase[shortURL].user_id) {
-    console.log("shortURL userId: ", userId)
-    console.log("url db user_id: ", urlDatabase[shortURL].user_id)
     res.send('These aren\'t the droids you\'re looking for.... Unfortunately this content was not created by you.  Please trying creating a new URL!');
+
   } else {
     res.render("urls_show", templateVars);
   }
@@ -212,7 +211,6 @@ app.post("/register", (req, res) => {
   const email = req.body.email;
   const password = req.body.password;
   const hashedPassword = bcrypt.hashSync(password, 10);
-  // console.log(hashedPassword);
 
   if ((email.length === 0) || (password.length === 0)) {
     res.status(400);
@@ -268,4 +266,3 @@ app.listen(PORT, () => {
 // Exports
 
 module.exports = users;
-// console.log("express module exports: ", module.exports);
