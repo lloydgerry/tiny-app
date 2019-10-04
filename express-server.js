@@ -153,7 +153,7 @@ app.post("/login", (req, res) => {
   }
 });
 
-//Logout
+//Logout - null cookie
 app.post("/logout", (req, res) => {
   req.session = null;
   res.redirect('/urls');
@@ -168,7 +168,7 @@ app.post("/urls", (req, res) => {
   res.redirect('/urls/' +  newShortUrl);
 });
 
-//If short URL visited, redirect to actual site
+//If ultra short URL visited (u), redirect to actual site
 app.get("/u/:shortURL", (req, res) => {
   const longURL = urlDatabase[req.params.shortURL];
   res.redirect(longURL);
