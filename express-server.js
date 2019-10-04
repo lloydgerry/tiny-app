@@ -4,6 +4,11 @@ const express = require("express");
 const bodyParser = require("body-parser");
 const morgan = require("morgan");
 const cookieParser = require('cookie-parser');
+const cookieSession = require('cookie-session');
+const { getUserByEmail } = require('./helpers.js')
+
+// const getUserByEmail = getUserByEmailExport();
+
 const app = express();
 const bcrypt = require('bcrypt');
 
@@ -18,13 +23,17 @@ app.set("view engine", "ejs");
 app.use(bodyParser.urlencoded({extended: true}));
 app.use(morgan(':method :url :status :response-time ms - :res[content-length]'));
 app.use(cookieParser());
-
-let newShortUrl = "";
+app.use(cookieSession({
+  name: 'session',
+  keys: ["sdf"],
+}));
 
 // ===============================
 // FUNCTIONS
 
+//generate random string varying size, cb defines size
 const generateRandomString = function(length) {
+  let newShortUrl = "";
   let possible = "ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789";
   for (let i = 0; i < length; i++) {
     newShortUrl += possible.charAt(Math.floor(Math.random() * possible.length));
@@ -32,23 +41,9 @@ const generateRandomString = function(length) {
   return newShortUrl;
 };
 
-// True/false found email function
-const getUserByEmail = function(emailId) {
-  for (key in users) {
-    // console.log(users[user].email);
-    if (users[key].email === emailId) {
-      return users[key];
-    }
-  }
-  return false;
-};
-
 // True/false found password function
 const foundPassword = function(passwordId) {
   for (key in users) {
-    console.log("stored pass: ", users[key].password);
-    console.log("pass var: ", passwordId)
-    // bcrypt.compareSync(password, users[key].password); // returns true
     if (bcrypt.compareSync(passwordId, users[key].password) === true) {
       return true;
     }
@@ -57,9 +52,11 @@ const foundPassword = function(passwordId) {
 };
 
 const getTemplateVars = function(req) {
-  let userId = req.cookies['userId'];
-  // console.log("Users object: ", users)
+  let userId = req.session.user_id;
+  // console.log("templatevars req params: ", req.params);
   let user = users[userId];
+  // console.log("templatevar userId: ", userId);
+  // console.log("templatevars users object", users);
   // console.log("var user: ", user);
   let templateVars = {
     urls: urlDatabase,
@@ -88,7 +85,7 @@ const urlsForUser = function(id) {
 //Users object
 const users = {
   "test": {
-    id: "test",
+    user_id: "test",
     email: "test@test.com",
     password: "$2b$10$SAka14YqvrRtgIdbZiVeNuyN3PdRciKhR1hDNVSi6/W/zhDNc0j3O"
   },
@@ -96,9 +93,9 @@ const users = {
 
 //Basic Url DB
 const urlDatabase = {
-  "b2xVn2": {shortURL: "b2xVn2", longURL: "http://www.lighthouselabs.ca", userId: "test"},
-  "9sm5xK": {shortURL: "9sm5xK", longURL: "http://www.google.com", userId: "d6gd323d"},
-  "7f6t7d": {shortURL: "7f6t7d", longURL: "https://abebooks.com", userId: "test"},
+  "b2xVn2": {shortURL: "b2xVn2", longURL: "http://www.lighthouselabs.ca", user_id: "test"},
+  "9sm5xK": {shortURL: "9sm5xK", longURL: "http://www.google.com", user_id: "d6gd323d"},
+  "7f6t7d": {shortURL: "7f6t7d", longURL: "https://abebooks.com", user_id: "test"},
 };
 
 // ===============================
@@ -127,7 +124,7 @@ app.get("/login", (req, res) => {
 //Create new URL
 app.get("/urls/new", (req, res) => {
   let templateVars = getTemplateVars(req);
-  let userId = req.cookies["userId"];
+  let userId = req.session.user_id;
   if (userId === undefined) {
     res.redirect("/login");
   } else {
@@ -138,8 +135,13 @@ app.get("/urls/new", (req, res) => {
 //"index"
 app.get("/urls", (req, res) => {
   let templateVars = getTemplateVars(req);
-  let userId = req.cookies["userId"];
-  res.render("urls_index", templateVars);
+  let userId = req.session.user_id;
+  if (userId === undefined) {
+    window.alert("Please login to see this page");
+    res.redirect('/login');
+  } else {
+    res.render("urls_index", templateVars);
+  }
 });
 
 //Login w/ cookie
@@ -147,10 +149,8 @@ app.post("/login", (req, res) => {
   let templateVars = getTemplateVars(req);
   let emailId = req.body.email;
   let user = getUserByEmail(emailId);
-  console.log("user object: ", user)
+  console.log("login user object: ", user)
   let password = req.body.password;
-  // let compareHash =  bcrypt.compareSync(password, hashedPassword); // returns true
-
   
   if (getUserByEmail(emailId) === false) {
     res.status(403);
@@ -158,17 +158,19 @@ app.post("/login", (req, res) => {
   } else if (foundPassword(password) === false) {
       res.status(403);
       res.send("YOU SHALL NOT PASS: The email or password was incorrect");
-      console.log(foundPassword(password))
+      // console.log(foundPassword(password))
     } else if (foundPassword(password) === true) {
-      res.cookie('userId', user["id"]);
+      console.log("login user object: ", user)
+      req.session.user_id = user.user_id; 
+      console.log("After setting of cookie ID in login", req.session.user_id)
       res.redirect('/urls');
     }
 });
 
 //Logout
 app.post("/logout", (req, res) => {
-  let userId = req.cookies["userId"];
-  res.clearCookie('userId', userId);
+  let userId = req.session.user_id;
+  req.session = null;
   res.redirect('/urls');
 });
 
@@ -189,7 +191,7 @@ app.get("/u/:shortURL", (req, res) => {
 //Short URL Page
 app.get("/urls/:shortURL", (req, res) => {
   let shortURL = req.params.shortURL;
-  let userId = req.cookies['userId'];
+  let userId = req.session['userId'];
   let user = users[userId];
   let templateVars = {
     urls: urlDatabase,
@@ -197,8 +199,8 @@ app.get("/urls/:shortURL", (req, res) => {
     user: user,
    }
   // let templateVars = getTemplateVars(req);
-  console.log("shortURL templateVars: ", templateVars)
-  console.log("req: ", req.params.shortURL)
+  // console.log("shortURL templateVars: ", templateVars)
+  // console.log("req: ", req.params.shortURL)
   res.render("urls_show", templateVars);
 });
 
@@ -206,24 +208,22 @@ app.get("/urls/:shortURL", (req, res) => {
 app.get("/register", (req, res) => {
   console.log("welcome to the register page!");
   templateVars = getTemplateVars(req);
-
   res.render("register", templateVars);
 });
-
 
 //Register new user form
 app.post("/register", (req, res) => {
   const email = req.body.email;
   const password = req.body.password;
   const hashedPassword = bcrypt.hashSync(password, 10);
-  console.log(hashedPassword);
+  // console.log(hashedPassword);
 
   if ((email.length === 0) || (password.length === 0)) {
     res.status(400);
     res.send("YOU SHALL NOT PASS: you left something blank.");
-  } else if (getUserByEmail(email)) {
+  } else if (getUserByEmail(users, email)) {
     res.status(400);
-    res.send("Sorry bub, you've been here before.");
+    res.send("Sorry bub, you are already registered.");
   } else {
 
     //make new userID
@@ -232,7 +232,7 @@ app.post("/register", (req, res) => {
 
     //set object from form data
     newUserObject = {
-      id: userId,
+      user_id: userId,
       email: email,
       password: hashedPassword,
     },
@@ -241,8 +241,8 @@ app.post("/register", (req, res) => {
     users[userId] = newUserObject;
 
     //set cookie from generated userId
-    res.cookie('userId', userId);
-
+    req.session.user_id = userId;
+    console.log("session cookie id after registering: ", req.session.user_id);
     res.redirect('/urls');
   }
 });
@@ -264,5 +264,11 @@ app.post("/urls/:shortURL/delete", (req, res) => {
 // ===============================
 //Server Setup and screen log
 app.listen(PORT, () => {
-  console.log(`Example app listening on port ${PORT}!`);
+  console.log(`Lloyd's Tiny App listening on port ${PORT}!`);
 });
+
+// ===============================
+// Exports
+
+module.exports = users;
+console.log("express module exports: ", module.exports);
