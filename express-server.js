@@ -216,7 +216,7 @@ app.post("/register", (req, res) => {
   if ((email.length === 0) || (password.length === 0)) {
     res.status(400);
     res.send("YOU SHALL NOT PASS: you left something blank.");
-  } else if (getUserByEmail(email)) {
+  } else if (getUserByEmail(users, email)) {
     res.status(400);
     res.send("Sorry bub, you are already registered.");
   } else {
