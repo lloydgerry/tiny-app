@@ -14,8 +14,8 @@
   <div class="card text-center">
       <div class="card-header"></div>
       <div class="card-body">
-        <h5 class="card-title">TinyURL for: <%= urls[shortURL] %></h5>
-        <p class="card-text">Short URL: <a href="/u/<%= urls %>"><%= shortURL %></a></p>
+        <h5 class="card-title">TinyURL for: <%= urls[shortURL].longURL %></h5>
+        <p class="card-text">Short URL: <a href="/u/<%= shortURL %>">localhost:8080/u/<%= shortURL %></a></p>
       </div>
   
     <div class="card-footer text-muted"></div>

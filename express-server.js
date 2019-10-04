@@ -164,13 +164,18 @@ app.post("/urls", (req, res) => {
   //change id length as num
   let num = 6;
   let newShortUrl = generateRandomString(num);
-  urlDatabase[newShortUrl] = req.body.longURL;
+  console.log("new url req body longURL: ", req.body.longURL)
+  urlDatabase[newShortUrl] = { 
+    shortURL: newShortUrl,
+    longURL: req.body.longURL,
+    user_id: req.session.user_id,
+  } 
   res.redirect('/urls/' +  newShortUrl);
 });
 
 //If ultra short URL visited (u), redirect to actual site
 app.get("/u/:shortURL", (req, res) => {
-  const longURL = urlDatabase[req.params.shortURL];
+  const longURL = urlDatabase[req.params.shortURL].longURL;
   res.redirect(longURL);
 });
 
@@ -187,6 +192,8 @@ app.get("/urls/:shortURL", (req, res) => {
   if (userId === undefined) {
     res.send('Please <a href=./login>login</a> to see this content.');
   } else if (userId !== urlDatabase[shortURL].user_id) {
+    console.log("shortURL userId: ", userId)
+    console.log("url db user_id: ", urlDatabase[shortURL].user_id)
     res.send('These aren\'t the droids you\'re looking for.... Unfortunately this content was not created by you.  Please trying creating a new URL!');
   } else {
     res.render("urls_show", templateVars);
@@ -231,7 +238,6 @@ app.post("/register", (req, res) => {
 
     //set cookie from generated userId
     req.session.user_id = userId;
-    console.log("session cookie id after registering: ", req.session.user_id);
     res.redirect('/urls');
   }
 });
@@ -239,7 +245,9 @@ app.post("/register", (req, res) => {
 //Update longURL
 app.post("/urls/:shortURL", (req, res) => {
   const shortURL = req.params.shortURL;
-  urlDatabase[shortURL] = req.body.longURL;
+  urlDatabase[shortURL] = {
+    longURL: req.body.longURL,
+  }
   res.redirect('/urls');
 });
 
