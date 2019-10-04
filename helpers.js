@@ -1,12 +1,9 @@
 
 // Find email function, returns object if match
-const getUserByEmail = function(users, emailFromForm) {
-  console.log("getuserbyemail helper made it to the function");
-  for (let key in users) {
-    console.log(key);
-    console.log("getuserbyemail helper: ", users[key].email);
-    if (users[key].email === emailFromForm) {
-      return users[key];
+const getUserByEmail = function(database, emailFromForm) {
+  for (let key in database) {
+    if (database[key].email === emailFromForm) {
+      return database[key];
     }
   }
   return false;

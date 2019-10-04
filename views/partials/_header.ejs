@@ -2,7 +2,7 @@
 
 
 <header>
-    <nav class="navbar navbar-expand-md navbar-dark bg-success">
+    <nav class="navbar navbar-expand-md navbar-light navbar-inverse bg-success navbar-inverse">
       <a class="navbar-brand" href="/urls">Lloyd's TinyApp</a>
       <button class="navbar-toggler" type="button" data-toggle="collapse" data-target="#navbarNavAltMarkup" aria-controls="navbarNavAltMarkup" aria-expanded="false" aria-label="Toggle navigation">
         <span class="navbar-toggler-icon"></span>
@@ -11,9 +11,8 @@
         <div class="navbar-nav">
           <a class="nav-item nav-link" href="/urls">My URLs</a>
           <a class="nav-item nav-link" href="/urls/new">Create New URL</a>
-          
         </div>
-        <div class="navbar ml-auto p-2 bd-highlight">
+        <div class="navbar ml-auto p-2 bd-highlight"> 
           <% if (!user) { %>
             <form method="GET" action="/login">
             <button  type="submit" class="btn btn-primary">Login</button>

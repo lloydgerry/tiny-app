@@ -9,9 +9,8 @@ const app = express();
 const bcrypt = require('bcrypt');
 
 
-const { getUserByEmail } = require('./helpers.js')
+const { getUserByEmail } = require('./helpers.js');
 
- 
 //Port Setting
 const PORT = 8080; // default port 8080
 
@@ -40,8 +39,8 @@ const generateRandomString = function(length) {
 };
 
 // True/false found password function
-const foundPassword = function(passwordId) {
-  for (key in users) {
+const foundPassword = function(users, passwordId) {
+  for (let key in users) {
     if (bcrypt.compareSync(passwordId, users[key].password) === true) {
       return true;
     }
@@ -65,11 +64,12 @@ const urlsForUser = function(id) {
   let urlIds = [];
   for (let key in urlDatabase) {
     if (urlDatabase[key].userId === id) {
-      urlIds.push(urlDatabase[key])
+      urlIds.push(urlDatabase[key]);
     }
   }
   return urlIds;
 };
+
 // ===============================
 // SERVER OBJECTS
 //Users object
@@ -92,12 +92,7 @@ const urlDatabase = {
 // EXPRESS APP
 
 app.get("/", (req, res) => {
-  res.send("Hello!");
-});
-
-//Return db info as json
-app.get("/urls.json", (req, res) => {
-  res.json(urlDatabase);
+  res.redirect("/login");
 });
 
 //EE
@@ -107,14 +102,16 @@ app.get("/hello", (req, res) => {
 
 app.get("/login", (req, res) => {
   // console.log(req.body)
-  templateVars = getTemplateVars(req);
-  res.render("login", templateVars)
+  let templateVars = getTemplateVars(req);
+
+  res.render("login", templateVars);
 });
 
 //Create new URL
 app.get("/urls/new", (req, res) => {
   let templateVars = getTemplateVars(req);
   let userId = req.session.user_id;
+
   if (userId === undefined) {
     res.redirect("/login");
   } else {
@@ -126,9 +123,9 @@ app.get("/urls/new", (req, res) => {
 app.get("/urls", (req, res) => {
   let templateVars = getTemplateVars(req);
   let userId = req.session.user_id;
+
   if (userId === undefined) {
-    res.send('Please <a href=./login>login</a> to see this content.')
-    res.redirect('/login');
+    res.send('Please <a href=./login>login</a> to see this content.');
   } else {
     res.render("urls_index", templateVars);
   }
@@ -139,27 +136,25 @@ app.post("/login", (req, res) => {
   let templateVars = getTemplateVars(req);
   let emailId = req.body.email;
   let user = getUserByEmail(emailId);
-  console.log("login user object: ", user)
   let password = req.body.password;
   
-  if (getUserByEmail(emailId) === false) {
+  if (getUserByEmail(users, emailId) === false) {
     res.status(403);
-    res.send("YOU SHALL NOT PASS: This email is not registered.")
-  } else if (foundPassword(password) === false) {
-      res.status(403);
-      res.send("YOU SHALL NOT PASS: The email or password was incorrect");
-      // console.log(foundPassword(password))
-    } else if (foundPassword(password) === true) {
-      console.log("login user object: ", user)
-      req.session.user_id = user.user_id; 
-      console.log("After setting of cookie ID in login", req.session.user_id)
-      res.redirect('/urls');
-    }
+    res.send("YOU SHALL NOT PASS: This email is not registered. Please register <a href=./register>here</a>.");
+
+  } else if (foundPassword(users, password) === false) {
+    res.status(403);
+    res.send("YOU SHALL NOT PASS: The email or password was incorrect");
+
+  } else if (foundPassword(users, password) === true) {
+    // console.log("login user object: ", user);
+    req.session.user_id = user.user_id;
+    res.redirect('/urls');
+  }
 });
 
 //Logout
 app.post("/logout", (req, res) => {
-  let userId = req.session.user_id;
   req.session = null;
   res.redirect('/urls');
 });
@@ -168,11 +163,12 @@ app.post("/logout", (req, res) => {
 app.post("/urls", (req, res) => {
   //change id length as num
   let num = 6;
-  urlDatabase[generateRandomString(num)] = req.body.longURL;
-  res.redirect('/url/' +  newShortUrl);
+  let newShortUrl = generateRandomString(num);
+  urlDatabase[newShortUrl] = req.body.longURL;
+  res.redirect('/urls/' +  newShortUrl);
 });
 
-//If short URL clicked, redirect to actual site
+//If short URL visited, redirect to actual site
 app.get("/u/:shortURL", (req, res) => {
   const longURL = urlDatabase[req.params.shortURL];
   res.redirect(longURL);
@@ -181,23 +177,26 @@ app.get("/u/:shortURL", (req, res) => {
 //Short URL Page
 app.get("/urls/:shortURL", (req, res) => {
   let shortURL = req.params.shortURL;
-  let userId = req.session['userId'];
+  let userId = req.session.user_id;
   let user = users[userId];
   let templateVars = {
     urls: urlDatabase,
     shortURL: shortURL,
     user: user,
-   }
-  // let templateVars = getTemplateVars(req);
-  // console.log("shortURL templateVars: ", templateVars)
-  // console.log("req: ", req.params.shortURL)
-  res.render("urls_show", templateVars);
+  };
+  if (userId === undefined) {
+    res.send('Please <a href=./login>login</a> to see this content.');
+  } else if (userId !== urlDatabase[shortURL].user_id) {
+    res.send('These aren\'t the droids you\'re looking for.... Unfortunately this content was not created by you.  Please trying creating a new URL!');
+  } else {
+    res.render("urls_show", templateVars);
+  }
 });
 
 //Register Page
 app.get("/register", (req, res) => {
-  console.log("welcome to the register page!");
-  templateVars = getTemplateVars(req);
+  console.log("welcome to the registration page!");
+  let templateVars = getTemplateVars(req);
   res.render("register", templateVars);
 });
 
@@ -221,11 +220,11 @@ app.post("/register", (req, res) => {
     let userId = generateRandomString(num);
 
     //set object from form data
-    newUserObject = {
+    const newUserObject = {
       user_id: userId,
       email: email,
       password: hashedPassword,
-    },
+    };
 
     //write to users object from form data
     users[userId] = newUserObject;
@@ -261,4 +260,4 @@ app.listen(PORT, () => {
 // Exports
 
 module.exports = users;
-console.log("express module exports: ", module.exports);
+// console.log("express module exports: ", module.exports);
