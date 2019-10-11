@@ -67,7 +67,6 @@ const urlsForUser = function(id) {
     }
   }
   return urlIds;
-  console.log(urlIds);
 };
 
 // ===============================
@@ -134,7 +133,7 @@ app.get("/urls", (req, res) => {
 app.post("/login", (req, res) => {
   let templateVars = getTemplateVars(req);
   let emailId = req.body.email;
-  let user = getUserByEmail(emailId);
+  let user = getUserByEmail(users, emailId);
   let password = req.body.password;
   
   if (getUserByEmail(users, emailId) === false) {
@@ -147,6 +146,7 @@ app.post("/login", (req, res) => {
 
   } else if (foundPassword(users, password) === true) {
     req.session.user_id = user.user_id;
+
     res.redirect('/urls');
   }
 });

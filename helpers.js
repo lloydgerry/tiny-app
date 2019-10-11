@@ -3,6 +3,7 @@
 const getUserByEmail = function(database, emailFromForm) {
   for (let key in database) {
     if (database[key].email === emailFromForm) {
+
       return database[key];
     }
   }
