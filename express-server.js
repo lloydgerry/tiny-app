@@ -243,9 +243,9 @@ app.post("/register", (req, res) => {
 //Update longURL
 app.post("/urls/:shortURL", (req, res) => {
   const shortURL = req.params.shortURL;
-  urlDatabase[shortURL] = {
-    longURL: req.body.longURL,
-  }
+  console.log("shortURL keyed: ", urlDatabase[shortURL].longURL)
+  urlDatabase[shortURL].longURL = req.body.longURL
+  console.log("longURL after update:", urlDatabase[shortURL].longURL)
   res.redirect('/urls');
 });
 
